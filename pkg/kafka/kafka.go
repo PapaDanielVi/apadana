@@ -18,7 +18,7 @@ func NewProducer(writer *kafka.Writer) *Producer {
 	return &Producer{writer: writer}
 }
 
-// Produce sends a message with X-Tenant-ID header from ctx.
+// Produce sends a message with X-Tenant-Id header from ctx.
 func (p *Producer) Produce(ctx context.Context, topic string, key, value []byte) error {
 	tenantID, _ := tctx.TenantIDFromContext(ctx)
 	msg := kafka.Message{
@@ -26,7 +26,7 @@ func (p *Producer) Produce(ctx context.Context, topic string, key, value []byte)
 		Key:   key,
 		Value: value,
 		Headers: []kafka.Header{
-			{Key: "X-Tenant-ID", Value: []byte(tenantID)},
+			{Key: "X-Tenant-Id", Value: []byte(tenantID)},
 		},
 	}
 	return p.writer.WriteMessages(ctx, msg)
@@ -52,7 +52,7 @@ func (c *Consumer) Consume(ctx context.Context, handler func(context.Context, ka
 
 		var tenantID string
 		for _, h := range msg.Headers {
-			if h.Key == "X-Tenant-ID" {
+			if h.Key == "X-Tenant-Id" {
 				tenantID = string(h.Value)
 				break
 			}

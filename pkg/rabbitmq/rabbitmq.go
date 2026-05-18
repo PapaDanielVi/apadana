@@ -18,10 +18,10 @@ func NewPublisher(ch *amqp091.Channel) *Publisher {
 	return &Publisher{ch: ch}
 }
 
-// Publish sends a message with X-Tenant-ID header from ctx.
+// Publish sends a message with X-Tenant-Id header from ctx.
 func (p *Publisher) Publish(ctx context.Context, exchange, routingKey string, body []byte) error {
 	tenantID, _ := tctx.TenantIDFromContext(ctx)
-	headers := amqp091.Table{"X-Tenant-ID": tenantID}
+	headers := amqp091.Table{"X-Tenant-Id": tenantID}
 	return p.ch.Publish(
 		exchange, routingKey, false, false,
 		amqp091.Publishing{
@@ -49,7 +49,7 @@ func (c *Consumer) Consume(ctx context.Context, queue string, handler func(conte
 	}
 	go func() {
 		for d := range deliveries {
-			tenantID, _ := d.Headers["X-Tenant-ID"].(string)
+			tenantID, _ := d.Headers["X-Tenant-Id"].(string)
 			ctx := tctx.WithTenantID(ctx, tenantID)
 			handler(ctx, d)
 		}

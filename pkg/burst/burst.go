@@ -42,7 +42,10 @@ func (c *Controller) Allow(ctx context.Context) bool {
 		tokens: c.burst,
 		last:   time.Now(),
 	})
-	bucket := v.(*tokenBucket)
+	bucket, ok := v.(*tokenBucket)
+	if !ok {
+		return false
+	}
 
 	bucket.mu.Lock()
 	defer bucket.mu.Unlock()

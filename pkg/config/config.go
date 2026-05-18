@@ -16,7 +16,10 @@ var tenantConfigs sync.Map // string → *sync.Map
 // Set stores value for key under the given tenantID.
 func Set(tenantID, key string, value interface{}) {
 	v, _ := tenantConfigs.LoadOrStore(tenantID, &sync.Map{})
-	perTenant := v.(*sync.Map)
+	perTenant, ok := v.(*sync.Map)
+	if !ok {
+		return
+	}
 	perTenant.Store(key, value)
 }
 
@@ -33,7 +36,10 @@ func Get(ctx context.Context, key string) (interface{}, error) {
 		return nil, fmt.Errorf("no config for tenant %q", tenantID)
 	}
 
-	perTenant := v.(*sync.Map)
+	perTenant, ok := v.(*sync.Map)
+	if !ok {
+		return nil, fmt.Errorf("invalid config type for tenant %q", tenantID)
+	}
 	val, ok := perTenant.Load(key)
 	if !ok {
 		return nil, fmt.Errorf("key %q not found for tenant %q", key, tenantID)

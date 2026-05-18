@@ -12,7 +12,7 @@ import (
 func TestDo_InjectsTenantHeader(t *testing.T) {
 	var gotHeader string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotHeader = r.Header.Get("X-Tenant-ID")
+		gotHeader = r.Header.Get("X-Tenant-Id")
 	}))
 	defer server.Close()
 
@@ -30,7 +30,7 @@ func TestDo_InjectsTenantHeader(t *testing.T) {
 func TestDo_NoTenantID(t *testing.T) {
 	var hasHeader bool
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, hasHeader = r.Header["X-Tenant-ID"]
+		_, hasHeader = r.Header["X-Tenant-Id"]
 	}))
 	defer server.Close()
 
@@ -41,6 +41,6 @@ func TestDo_NoTenantID(t *testing.T) {
 	client.Do(ctx, req)
 
 	if hasHeader {
-		t.Fatal("expected no X-Tenant-ID header")
+		t.Fatal("expected no X-Tenant-Id header")
 	}
 }

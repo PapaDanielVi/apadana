@@ -11,9 +11,9 @@ import (
 func TestFromHeader(t *testing.T) {
 	t.Parallel()
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
-	r.Header.Set("X-Tenant-ID", "acme")
+	r.Header.Set("X-Tenant-Id", "acme")
 
-	extractor := FromHeader("X-Tenant-ID")
+	extractor := FromHeader("X-Tenant-Id")
 	tenantID, err := extractor(r)
 	if err != nil {
 		t.Fatalf("extractor error = %v", err)
@@ -71,9 +71,9 @@ func TestTenantMiddleware_SetsTenantID(t *testing.T) {
 		}
 	})
 
-	middleware := TenantMiddleware(FromHeader("X-Tenant-ID"))(handler)
+	middleware := TenantMiddleware(FromHeader("X-Tenant-Id"))(handler)
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
-	r.Header.Set("X-Tenant-ID", "acme")
+	r.Header.Set("X-Tenant-Id", "acme")
 	w := httptest.NewRecorder()
 
 	middleware.ServeHTTP(w, r)
@@ -90,7 +90,7 @@ func TestTenantMiddleware_NoTenantID(t *testing.T) {
 		hasTenantID = tctx.HasTenantID(r.Context())
 	})
 
-	middleware := TenantMiddleware(FromHeader("X-Tenant-ID"))(handler)
+	middleware := TenantMiddleware(FromHeader("X-Tenant-Id"))(handler)
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 

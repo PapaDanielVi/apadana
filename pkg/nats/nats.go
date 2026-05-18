@@ -18,13 +18,13 @@ func NewPublisher(nc *nats.Conn) *Publisher {
 	return &Publisher{nc: nc}
 }
 
-// Publish sends a message with X-Tenant-ID header from ctx.
+// Publish sends a message with X-Tenant-Id header from ctx.
 func (p *Publisher) Publish(ctx context.Context, subject string, data []byte) error {
 	tenantID, _ := tctx.TenantIDFromContext(ctx)
 	msg := &nats.Msg{
 		Subject: subject,
 		Data:    data,
-		Header:  nats.Header{"X-Tenant-ID": []string{tenantID}},
+		Header:  nats.Header{"X-Tenant-Id": []string{tenantID}},
 	}
 	return p.nc.PublishMsg(msg)
 }
@@ -42,7 +42,7 @@ func NewSubscriber(nc *nats.Conn) *Subscriber {
 // Subscribe listens on subject and calls handler with tenant-aware context.
 func (s *Subscriber) Subscribe(ctx context.Context, subject string, handler func(context.Context, *nats.Msg)) error {
 	_, err := s.nc.Subscribe(subject, func(msg *nats.Msg) {
-		tenantID := msg.Header.Get("X-Tenant-ID")
+		tenantID := msg.Header.Get("X-Tenant-Id")
 		ctx := tctx.WithTenantID(ctx, tenantID)
 		handler(ctx, msg)
 	})
