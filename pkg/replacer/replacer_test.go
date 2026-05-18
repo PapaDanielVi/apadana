@@ -6,10 +6,10 @@ func TestReplace(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name      string
-		s         string
-		tenantID  string
-		want      string
+		name     string
+		s        string
+		tenantID string
+		want     string
 	}{
 		{"single placeholder", "db_{tenant_id}_schema", "acme", "db_acme_schema"},
 		{"multiple placeholders", "{tenant_id}-{tenant_id}", "x", "x-x"},

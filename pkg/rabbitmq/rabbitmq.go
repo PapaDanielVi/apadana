@@ -4,8 +4,8 @@ package rabbitmq
 import (
 	"context"
 
-	"github.com/rabbitmq/amqp091-go"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 // Publisher publishes messages with tenant ID header.

@@ -14,7 +14,7 @@ import (
 var tenantConfigs sync.Map // string → *sync.Map
 
 // Set stores value for key under the given tenantID.
-func Set(tenantID, key string, value interface{}) {
+func Set(tenantID, key string, value any) {
 	v, _ := tenantConfigs.LoadOrStore(tenantID, &sync.Map{})
 	perTenant, ok := v.(*sync.Map)
 	if !ok {
@@ -25,7 +25,7 @@ func Set(tenantID, key string, value interface{}) {
 
 // Get retrieves the config value for key from the tenant in ctx.
 // Returns an error if tenant ID is missing or key is not found.
-func Get(ctx context.Context, key string) (interface{}, error) {
+func Get(ctx context.Context, key string) (any, error) {
 	tenantID, ok := tctx.TenantIDFromContext(ctx)
 	if !ok {
 		return nil, errors.New("no tenant ID in context")

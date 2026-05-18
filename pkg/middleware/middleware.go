@@ -27,7 +27,7 @@ func FromQuery(paramName string) Extractor {
 }
 
 // FromSubdomain returns an Extractor that extracts tenant ID from the subdomain.
-// e.g., "acme.example.com" → "acme"
+// e.g., "acme.example.com" → "acme".
 func FromSubdomain() Extractor {
 	return func(r *http.Request) (string, error) {
 		host := r.Host

@@ -19,8 +19,8 @@ type tokenBucket struct {
 
 // Controller manages per-tenant rate limiters.
 type Controller struct {
-	rate       int
-	burst      int
+	rate        int
+	burst       int
 	controllers sync.Map // tenantID → *tokenBucket
 }
 

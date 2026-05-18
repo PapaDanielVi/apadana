@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/redis/go-redis/v9"
 )
 
 // TenantClient wraps redis.Client with automatic key prefixing.
@@ -30,6 +30,6 @@ func (tc *TenantClient) Get(ctx context.Context, key string) *redis.StringCmd {
 	return tc.client.Get(ctx, tc.KeyPrefix(ctx)+key)
 }
 
-func (tc *TenantClient) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd {
+func (tc *TenantClient) Set(ctx context.Context, key string, value any, expiration time.Duration) *redis.StatusCmd {
 	return tc.client.Set(ctx, tc.KeyPrefix(ctx)+key, value, expiration)
 }

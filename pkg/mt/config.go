@@ -8,7 +8,7 @@ import (
 // ConfigMgr holds per-tenant configs with a fallback default.
 type ConfigMgr[T any] struct {
 	configs map[string]T
-	defCfg   T
+	defCfg  T
 }
 
 // NewConfigMgr creates a new manager with copied tenant configs and a default.
@@ -17,7 +17,7 @@ func NewConfigMgr[T any](configs map[string]T, defCfg T) *ConfigMgr[T] {
 	maps.Copy(copied, configs)
 	return &ConfigMgr[T]{
 		configs: copied,
-		defCfg:   defCfg,
+		defCfg:  defCfg,
 	}
 }
 

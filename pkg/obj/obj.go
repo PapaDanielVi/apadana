@@ -36,7 +36,10 @@ func Get(ctx context.Context, name string) (any, error) {
 
 	// Get or create per-tenant instance map
 	v, _ := tenantObjs.LoadOrStore(tenantID, &sync.Map{})
-	perTenant := v.(*sync.Map)
+	perTenant, ok := v.(*sync.Map)
+	if !ok {
+		return nil, fmt.Errorf("invalid per-tenant map for tenant %q", tenantID)
+	}
 
 	// Check if instance already exists
 	inst, ok := perTenant.Load(name)

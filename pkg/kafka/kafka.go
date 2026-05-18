@@ -4,8 +4,8 @@ package kafka
 import (
 	"context"
 
-	"github.com/segmentio/kafka-go"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/segmentio/kafka-go"
 )
 
 // Producer publishes messages with tenant ID header.

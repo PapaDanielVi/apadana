@@ -4,8 +4,8 @@ package metrics
 import (
 	"context"
 
-	"github.com/prometheus/client_golang/prometheus"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // TenantCounter wraps a prometheus.CounterVec with automatic tenant_id label.

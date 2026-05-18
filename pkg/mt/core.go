@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	defaultTID   = "default"
-	setDefOnce   sync.Once
+	defaultTID = "default"
+	setDefOnce sync.Once
 )
 
 const fallbackTID = "default"

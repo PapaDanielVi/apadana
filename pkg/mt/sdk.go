@@ -8,9 +8,9 @@ import (
 )
 
 type (
-	InitFn[S any, C any]               func(context.Context, C) S
-	InitFnE[S any, C any]              func(context.Context, C) (S, error)
-	InitFnWMet[S any, C any, M any]    func(context.Context, C, M) S
+	InitFn[S any, C any]            func(context.Context, C) S
+	InitFnE[S any, C any]           func(context.Context, C) (S, error)
+	InitFnWMet[S any, C any, M any] func(context.Context, C, M) S
 )
 
 // ISDK is the interface for SDK managers returning T.

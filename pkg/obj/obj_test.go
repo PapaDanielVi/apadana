@@ -10,7 +10,7 @@ import (
 
 func TestGet_ReturnsSameInstance(t *testing.T) {
 	tenantID := "tenant-obj-1"
-	Register("db", func() (interface{}, error) {
+	Register("db", func() (any, error) {
 		return "db-conn", nil
 	})
 
@@ -63,7 +63,7 @@ func TestGet_UnregisteredName(t *testing.T) {
 }
 
 func TestGet_FactoryError(t *testing.T) {
-	Register("bad", func() (interface{}, error) {
+	Register("bad", func() (any, error) {
 		return nil, errors.New("init failed")
 	})
 

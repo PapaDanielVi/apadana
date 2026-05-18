@@ -4,8 +4,8 @@ package nats
 import (
 	"context"
 
-	"github.com/nats-io/nats.go"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/nats-io/nats.go"
 )
 
 // Publisher publishes messages with tenant ID header.
