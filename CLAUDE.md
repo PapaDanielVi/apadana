@@ -53,3 +53,41 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Implementation Learnings
+
+**Patterns and gotchas discovered during development.**
+
+### Package naming
+- `tenantctx` was too verbose, renamed to `tctx` for brevity
+- Import alias convention: `tctx "github.com/PapaDanielVi/apadana/pkg/context"`
+
+### Go idioms
+- Use `any` instead of `interface{}` (Go 1.18+)
+- Maps are not comparable - use pointers (`new(int)`) in tests for equality checks
+- `new(struct{})` returns same pointer for zero-sized types - use `new(int)` for unique pointers
+
+### Dependencies
+- Run `go mod tidy` after adding dependencies
+- Missing go.sum entries cause build failures - `go mod tidy` fixes them
+- Some deps need transitive deps manually added (prometheus)
+
+### Testing
+- Unused imports cause build failures in test files too
+- Use `httptest.NewServer` and `httptest.NewRequest` for HTTP tests
+- Use `github.com/alicebob/miniredis/v2` for Redis tests without a server
+- Skip integration tests when servers aren't available: `t.Skip("no server")`
+- Return types matter: `redis.StringCmd` ≠ `redis.StringSliceCmd`
+
+### Lint rules (golangci-lint v2)
+- `paralleltest`: Add `t.Parallel()` to tests
+- `testpackage`: Use `package foo_test` not `package foo`
+- `canonicalheader`: HTTP headers use canonical form (`X-Tenant-Id` not `X-Tenant-ID`)
+- `gochecknoglobals`: Avoid package-level globals (use `sync.Map` or init functions)
+- `modernize`: Use modern Go constructs (`any` over `interface{}`)
+
+### Multi-tenancy patterns
+- All packages extract tenant ID from `context.Context` using `pkg/context`
+- Key prefixing pattern: `tenant:{id}:key` for Redis
+- Header injection pattern: `X-Tenant-ID` for HTTP, RabbitMQ, Kafka, NATS
+- Per-tenant singletons: Use `sync.Map` with `LoadOrStore` for thread safety
