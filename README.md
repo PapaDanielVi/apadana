@@ -1,5 +1,11 @@
 # apadana
 
+[![CI](https://github.com/PapaDanielVi/apadana/actions/workflows/ci.yml/badge.svg)](https://github.com/PapaDanielVi/apadana/actions/workflows/ci.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/PapaDanielVi/apadana)](https://github.com/PapaDanielVi/apadana)
+[![License](https://img.shields.io/github/license/PapaDanielVi/apadana)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/PapaDanielVi/apadana)](https://goreportcard.com/report/github.com/PapaDanielVi/apadana)
+[![GoDoc](https://pkg.go.dev/badge/github.com/PapaDanielVi/apadana)](https://pkg.go.dev/github.com/PapaDanielVi/apadana)
+
 A Go SDK providing building blocks for multi-tenant applications. Handles tenant identification, context propagation, per-tenant configuration, metrics, logging, and instrumentation across common infrastructure.
 
 ## Installation
@@ -29,8 +35,8 @@ func main() {
 		w.Write([]byte("hello " + tenantID))
 	})
 
-	// Extract tenant ID from X-Tenant-ID header
-	mw := middleware.TenantMiddleware(middleware.FromHeader("X-Tenant-ID"))(handler)
+	// Extract tenant ID from X-Tenant-Id header
+	mw := middleware.TenantMiddleware(middleware.FromHeader("X-Tenant-Id"))(handler)
 
 	http.ListenAndServe(":8080", mw)
 }
@@ -52,10 +58,10 @@ func main() {
 | `pkg/metrics` | Prometheus metrics with `tenant_id` label | `NewCounter`, `NewHistogram` — auto-labeled |
 | `pkg/db` | Multi-tenant database support | `ColumnModel`, `DatabaseModel`, `InstanceModel` |
 | `pkg/redis` | Redis with key prefixing | `NewClient(ctx, opts)` — keys prefixed `tenant:{id}:key` |
-| `pkg/rabbitmq` | RabbitMQ with `X-Tenant-ID` header | `Publisher`, `Consumer` |
-| `pkg/kafka` | Kafka with `X-Tenant-ID` header | `Producer`, `Consumer` |
-| `pkg/nats` | NATS with `X-Tenant-ID` header | `Publisher`, `Subscriber` |
-| `pkg/httpclient` | HTTP client with tenant header injection | `Do(ctx, req)` — auto-injects `X-Tenant-ID` |
+| `pkg/rabbitmq` | RabbitMQ with `X-Tenant-Id` header | `Publisher`, `Consumer` |
+| `pkg/kafka` | Kafka with `X-Tenant-Id` header | `Producer`, `Consumer` |
+| `pkg/nats` | NATS with `X-Tenant-Id` header | `Publisher`, `Subscriber` |
+| `pkg/httpclient` | HTTP client with tenant header injection | `Do(ctx, req)` — auto-injects `X-Tenant-Id` |
 | `pkg/burst` | Per-tenant token bucket rate limiter | `New(rate, burst)`, `Allow(ctx)` |
 | `pkg/mt` — Additional Tools | | |
 | &nbsp;&nbsp; `core.go` | Core tenant ID extraction/injection | `SetDefTenant`, `ExtractTID`, `InjectTID`, `InjectTenantFromObj` |
