@@ -1,6 +1,6 @@
 # apadana
 
-apadana is a Go SDK that provides building blocks for multi-tenant applications. It handles tenant identification, context propagation, per-tenant configuration, metrics, logging, and instrumentation across common infrastructure: databases, Redis, Kafka, RabbitMQ, NATS, and HTTP.
+A Go SDK providing building blocks for multi-tenant applications. Handles tenant identification, context propagation, per-tenant configuration, metrics, logging, and instrumentation across common infrastructure.
 
 ## Installation
 
@@ -38,197 +38,36 @@ func main() {
 
 ## Packages
 
-### Core
-
-#### `pkg/context` — Context Management
-Utilities for storing and retrieving tenant IDs in `context.Context`.
-
-```go
-ctx := context.WithTenantID(context.Background(), "acme-corp")
-tenantID, ok := context.TenantIDFromContext(ctx)
-```
-
-#### `pkg/replacer` — Tenant Replacer
-Replaces `{tenant_id}` placeholders in strings.
-
-```go
-s := replacer.Replace("db_{tenant_id}_schema", "acme")
-// s == "db_acme_schema"
-```
-
-#### `pkg/config` — Config Management
-Thread-safe per-tenant configuration storage.
-
-```go
-config.Set("acme", "db_host", "localhost:5432")
-ctx := context.WithTenantID(context.Background(), "acme")
-host, _ := config.Get(ctx, "db_host")
-```
-
-#### `pkg/timezone` — Timezone Per Tenant
-Manage per-tenant timezone settings.
-
-```go
-loc, _ := time.LoadLocation("America/New_York")
-timezone.Set("acme", loc)
-
-ctx := context.WithTenantID(context.Background(), "acme")
-now := timezone.Now(ctx) // time in tenant's timezone
-```
-
-#### `pkg/obj` — Object Management SDK
-Lazy-initialized, centralized singleton objects per tenant.
-
-```go
-obj.Register("cache", func() (any, error) {
-	return make(map[string]string), nil
-})
-
-ctx := context.WithTenantID(context.Background(), "acme")
-cache, _ := obj.Get(ctx, "cache") // same instance for all calls
-```
-
-### Identification & Logging
-
-#### `pkg/middleware` — HTTP Middlewares
-Extract tenant ID from HTTP requests and inject into context.
-
-```go
-// From header
-m := middleware.TenantMiddleware(middleware.FromHeader("X-Tenant-ID"))(handler)
-
-// From query parameter
-m := middleware.TenantMiddleware(middleware.FromQuery("tenant"))(handler)
-
-// From subdomain
-m := middleware.TenantMiddleware(middleware.FromSubdomain())(handler)
-```
-
-#### `pkg/logger` — Logger Wrapper
-Wraps `log/slog` to automatically include `tenant_id` in log output.
-
-```go
-ctx := context.WithTenantID(context.Background(), "acme")
-logger := logger.New(ctx)
-logger.Info("processing order") // includes tenant_id=acme
-```
-
-### Instrumentation
-
-#### `pkg/otel` — OpenTelemetry Tenant Injection
-Automatically adds `tenant_id` as a span attribute.
-
-```go
-processor := otel.NewTenantIDProcessor()
-// Register with your OTEL SDK setup
-```
-
-#### `pkg/metrics` — Prometheus Metrics
-Multi-tenant counters and histograms with automatic `tenant_id` label.
-
-```go
-counter := metrics.NewCounter("http_requests_total", "Total requests")
-histogram := metrics.NewHistogram("request_duration_seconds", "Request duration", nil)
-
-ctx := context.WithTenantID(context.Background(), "acme")
-counter.Inc(ctx)
-histogram.Observe(ctx, 0.5)
-```
-
-### Data Layer
-
-#### `pkg/db` — Tenant Registry
-Multi-tenancy support for MySQL/PostgreSQL using three models:
-
-- **ColumnModel**: Adds `WHERE tenant_id = 'id'` to queries
-- **DatabaseModel**: Separate database per tenant
-- **InstanceModel**: Separate connection per tenant
-
-```go
-reg := db.New(db.ColumnModel, "mysql", "user:pass@/db")
-mw := reg.ColumnMiddleware()
-query := mw(ctx, "SELECT * FROM orders")
-// query == "SELECT * FROM orders WHERE tenant_id = 'acme'"
-```
-
-#### `pkg/redis` — Redis v9 Tools
-Wraps `go-redis/v9` with automatic key prefixing (`tenant:{id}:key`).
-
-```go
-client := redis.NewClient(ctx, &redis.Options{Addr: "localhost:6379"})
-client.Set(ctx, "mykey", "myvalue", 0)
-val, _ := client.Get(ctx, "mykey").Result()
-```
-
-### Messaging
-
-#### `pkg/rabbitmq` — RabbitMQ Tools
-Publish and consume messages with `X-Tenant-ID` header.
-
-```go
-// Publish
-pub := rabbitmq.NewPublisher(ch)
-pub.Publish(ctx, "exchange", "routing-key", []byte("msg"))
-
-// Consume
-cons := rabbitmq.NewConsumer(ch)
-cons.Consume(ctx, "queue", func(ctx context.Context, d amqp.Delivery) {
-	// ctx has tenant ID from message headers
-})
-```
-
-#### `pkg/kafka` — Kafka Tools
-Produce and consume Kafka messages with tenant ID in headers.
-
-```go
-// Produce
-prod := kafka.NewProducer(writer)
-prod.Produce(ctx, "topic", []byte("key"), []byte("value"))
-
-// Consume
-cons := kafka.NewConsumer(reader)
-cons.Consume(ctx, func(ctx context.Context, msg kafka.Message) {
-	// ctx has tenant ID from message headers
-})
-```
-
-#### `pkg/nats` — NATS Tools
-Publish and subscribe with tenant ID in NATS headers.
-
-```go
-// Publish
-pub := nats.NewPublisher(nc)
-pub.Publish(ctx, "subject", []byte("msg"))
-
-// Subscribe
-sub := nats.NewSubscriber(nc)
-sub.Subscribe(ctx, "subject", func(ctx context.Context, msg *nats.Msg) {
-	// ctx has tenant ID from message headers
-})
-```
-
-### HTTP & Advanced
-
-#### `pkg/httpclient` — HTTP Client Tools
-Wraps `http.Client` to inject `X-Tenant-ID` header into outgoing requests.
-
-```go
-client := httpclient.New()
-req, _ := http.NewRequestWithContext(ctx, "GET", "https://api.example.com", nil)
-resp, err := client.Do(ctx, req) // X-Tenant-ID header auto-injected
-```
-
-#### `pkg/burst` — Burst Controller Per Tenant
-Token bucket rate limiter with separate buckets per tenant.
-
-```go
-ctrl := burst.New(10, 5) // 10 req/sec, burst of 5
-
-ctx := context.WithTenantID(context.Background(), "acme")
-if ctrl.Allow(ctx) {
-	// handle request
-}
-```
+| Package | Description | Key Functions / Types |
+|---------|-------------|----------------------|
+| `pkg/context` | Tenant ID in `context.Context` | `WithTenantID`, `TenantIDFromContext`, `HasTenantID` |
+| `pkg/mt` | Generic multi-tenant tools | `SetDefTenant`, `ExtractTID`, `InjectTID`, `ConfigMgr[T]`, `SDKMgr[T,C]`, `CloneCtx`, `ExpandConfigReader` |
+| `pkg/middleware` | HTTP middlewares (std, Echo) | `TenantMiddleware`, `FromHeader`, `FromQuery`, `FromSubdomain`, `TenantEchoMiddleware`, `UserAuthEchoMiddleware`, `PrometheusEchoMiddleware` |
+| `pkg/replacer` | Tenant placeholder replacement | `Replace` — replaces `{tenant_id}` in strings |
+| `pkg/config` | Per-tenant config storage | `Set`, `Get`, thread-safe key-value per tenant |
+| `pkg/timezone` | Per-tenant timezone settings | `Set`, `Now` — returns time in tenant's timezone |
+| `pkg/obj` | Lazy-init per-tenant singletons | `Register`, `Get` — centralized or per-tenant objects |
+| `pkg/logger` | Logger with `tenant_id` field | `New(ctx)` — wraps `log/slog` with tenant ID |
+| `pkg/otel` | OpenTelemetry span processor | `NewTenantIDProcessor()` — adds `tenant_id` to spans |
+| `pkg/metrics` | Prometheus metrics with `tenant_id` label | `NewCounter`, `NewHistogram` — auto-labeled |
+| `pkg/db` | Multi-tenant database support | `ColumnModel`, `DatabaseModel`, `InstanceModel` |
+| `pkg/redis` | Redis with key prefixing | `NewClient(ctx, opts)` — keys prefixed `tenant:{id}:key` |
+| `pkg/rabbitmq` | RabbitMQ with `X-Tenant-ID` header | `Publisher`, `Consumer` |
+| `pkg/kafka` | Kafka with `X-Tenant-ID` header | `Producer`, `Consumer` |
+| `pkg/nats` | NATS with `X-Tenant-ID` header | `Publisher`, `Subscriber` |
+| `pkg/httpclient` | HTTP client with tenant header injection | `Do(ctx, req)` — auto-injects `X-Tenant-ID` |
+| `pkg/burst` | Per-tenant token bucket rate limiter | `New(rate, burst)`, `Allow(ctx)` |
+| `pkg/mt` — Additional Tools | | |
+| &nbsp;&nbsp; `core.go` | Core tenant ID extraction/injection | `SetDefTenant`, `ExtractTID`, `InjectTID`, `InjectTenantFromObj` |
+| &nbsp;&nbsp; `config.go` | Generic config manager | `ConfigMgr[T]{Get, Map, Tenants}` |
+| &nbsp;&nbsp; `sdk.go` | Generic SDK managers | `SDKMgr[T,C]`, `SDKMgrE[T,C]`, `SDKMgrWMet[T,C,M]`, `NewSDKMgr`, `NewSDKMgrE`, `NewSDKMgrWMet` |
+| &nbsp;&nbsp; `context.go` | Context cloning with OTEL preservation | `CloneCtx` — copies tenant + baggage + span |
+| &nbsp;&nbsp; `yaml.go` | YAML config expansion | `ExpandConfigReader` — merges defaults, replaces `${tenant}` |
+| &nbsp;&nbsp; `template.go` | Echo template rendering + tenant replacer | `TplRenderer`, `TenantRepl`, `NewTplRenderer` |
+| &nbsp;&nbsp; `assertions.go` | SDK init interfaces | `lazyIniter`, `centralizedSDKMer` |
+| &nbsp;&nbsp; `mocks.go` | Mock generators for SDK interfaces | `MockISDK[T]`, `MockISDKE[T]`, `NewISDKMock`, `NewISDKEMock` |
+| `pkg/middleware` — Echo Extras | | |
+| &nbsp;&nbsp; `echo.go` | Echo-specific middlewares | `TenantEchoMiddleware`, `UserAuthEchoMiddleware`, `OAuth2EchoMiddleware`, `PrometheusEchoMiddleware`, `ExtractUserID` |
 
 ## License
 
