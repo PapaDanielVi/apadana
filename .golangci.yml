@@ -427,6 +427,9 @@ linters:
         # Omit embedded fields from selector expression.
         # https://staticcheck.dev/docs/checks/#QF1008
         - -QF1008
+        # Disable shadow analyzer (variable shadowing)
+        - -SA4000
+        - -shadow
 
     usetesting:
       # Enable/disable `os.TempDir()` detections.
