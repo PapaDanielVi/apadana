@@ -1,4 +1,4 @@
-# apadana
+# apadana: Multi-Tenant SDK for Go
 
 [![CI](https://github.com/PapaDanielVi/apadana/actions/workflows/ci.yml/badge.svg)](https://github.com/PapaDanielVi/apadana/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/PapaDanielVi/apadana)](https://github.com/PapaDanielVi/apadana)
@@ -7,6 +7,17 @@
 [![GoDoc](https://pkg.go.dev/badge/github.com/PapaDanielVi/apadana)](https://pkg.go.dev/github.com/PapaDanielVi/apadana)
 
 A Go SDK providing building blocks for multi-tenant applications. Handles tenant identification, context propagation, per-tenant configuration, metrics, logging, and instrumentation across common infrastructure.
+
+## Features
+
+- **Tenant Isolation** — Extract, propagate, and inject tenant IDs across HTTP, gRPC, Kafka, NATS, and RabbitMQ
+- **SaaS-Ready** — Per-tenant configuration, singletons, timezones, and rate limiting out of the box
+- **Context Propagation** — Thread-safe tenant context with `context.Context` integration
+- **Multi-Tenant Middleware** — HTTP (standard lib & Echo) middlewares for header, query, and subdomain extraction
+- **Per-Tenant Infrastructure** — Redis key prefixing, Kafka/NATS/RabbitMQ header injection, database registry
+- **Observability** — Prometheus metrics with `tenant_id` labels, OpenTelemetry span processor, structured logging with `log/slog`
+- **Generic SDK Managers** — Type-safe `ConfigMgr[T]` and `SDKMgr[T,C]` for any multi-tenant resource
+- **YAML Config Expansion** — Merge default and per-tenant configs with `${tenant}` placeholder replacement
 
 ## Installation
 
