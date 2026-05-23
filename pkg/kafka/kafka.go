@@ -43,8 +43,15 @@ func NewConsumer(reader *kafka.Reader) *Consumer {
 }
 
 // Consume reads messages and calls handler with tenant-aware context.
+// It returns when the context is cancelled or a fatal error occurs.
 func (c *Consumer) Consume(ctx context.Context, handler func(context.Context, kafka.Message)) error {
 	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		msg, err := c.reader.FetchMessage(ctx)
 		if err != nil {
 			return err
@@ -58,8 +65,8 @@ func (c *Consumer) Consume(ctx context.Context, handler func(context.Context, ka
 			}
 		}
 
-		ctx := tctx.WithTenantID(ctx, tenantID)
-		handler(ctx, msg)
+		msgCtx := tctx.WithTenantID(ctx, tenantID)
+		handler(msgCtx, msg)
 
 		if err := c.reader.CommitMessages(ctx, msg); err != nil {
 			return err

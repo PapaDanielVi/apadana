@@ -1,0 +1,32 @@
+name: Feature Request
+description: Suggest a new feature for apadana
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions you've considered.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Willing to contribute
+      options:
+        - label: I am willing to submit a PR for this feature
