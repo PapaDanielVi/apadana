@@ -75,9 +75,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ### Testing
 - Unused imports cause build failures in test files too
 - Use `httptest.NewServer` and `httptest.NewRequest` for HTTP tests
-- Use `github.com/alicebob/miniredis/v2` for Redis tests without a server
 - Skip integration tests when servers aren't available: `t.Skip("no server")`
-- Return types matter: `redis.StringCmd` ≠ `redis.StringSliceCmd`
 
 ### Lint rules (golangci-lint v2)
 - `paralleltest`: Add `t.Parallel()` to tests
@@ -88,6 +86,5 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### Multi-tenancy patterns
 - All packages extract tenant ID from `context.Context` using `pkg/context`
-- Key prefixing pattern: `tenant:{id}:key` for Redis
 - Header injection pattern: `X-Tenant-ID` for HTTP, RabbitMQ, Kafka, NATS
 - Per-tenant singletons: Use `sync.Map` with `LoadOrStore` for thread safety
