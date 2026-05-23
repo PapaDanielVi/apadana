@@ -24,17 +24,6 @@ func (c centralizedConfig) IsCentralized() bool {
 	return c.centralized
 }
 
-// centralizedEagerConfig implements both interfaces.
-type centralizedEagerConfig struct {
-	centralized bool
-}
-
-func (c centralizedEagerConfig) IsCentralized() bool {
-	return c.centralized
-}
-
-func (c centralizedEagerConfig) LazyInit() bool { return false }
-
 func TestNewSDKMgr_LazyInit(t *testing.T) {
 	t.Parallel()
 

@@ -68,7 +68,7 @@ func (c *Consumer) Consume(ctx context.Context, handler func(context.Context, ka
 		msgCtx := tctx.WithTenantID(ctx, tenantID)
 		handler(msgCtx, msg)
 
-		if err := c.reader.CommitMessages(ctx, msg); err != nil {
+		if err = c.reader.CommitMessages(ctx, msg); err != nil {
 			return err
 		}
 	}

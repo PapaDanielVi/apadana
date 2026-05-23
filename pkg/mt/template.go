@@ -73,13 +73,13 @@ func NewTplRenderer(basePath string, tenantReplacements map[string]string) (*Tpl
 		if entry.IsDir() {
 			tid := entry.Name()
 			pattern := filepath.Join(basePath, tid, "*")
-			files, err := filepath.Glob(pattern)
-			if err != nil || len(files) == 0 {
+			files, nErr := filepath.Glob(pattern)
+			if nErr != nil || len(files) == 0 {
 				return nil, fmt.Errorf("glob templates for %s: %w", tid, err)
 			}
-			tmpl, err := template.ParseFiles(files...)
-			if err != nil {
-				return nil, fmt.Errorf("parse templates for %s: %w", tid, err)
+			tmpl, nErr := template.ParseFiles(files...)
+			if nErr != nil {
+				return nil, fmt.Errorf("parse templates for %s: %w", tid, nErr)
 			}
 			r.templates[tid] = tmpl
 		}
@@ -97,7 +97,7 @@ func (r *TplRenderer) Render(w io.Writer, name string, data any, c echo.Context)
 		return echo.NewHTTPError(http.StatusInternalServerError, "template not found for tenant: "+tid)
 	}
 
-	if viewCtx, ok := data.(map[string]any); ok {
+	if viewCtx, nok := data.(map[string]any); nok {
 		viewCtx["reverse"] = c.Echo().Reverse
 		viewCtx["Path"] = c.Path()
 		viewCtx["Request"] = c.Request()

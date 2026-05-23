@@ -152,7 +152,7 @@ func extractJWTClaim(token, claimName string) (string, error) {
 	}
 
 	var claims map[string]any
-	if err := json.Unmarshal(payload, &claims); err != nil {
+	if err = json.Unmarshal(payload, &claims); err != nil {
 		return "", err
 	}
 

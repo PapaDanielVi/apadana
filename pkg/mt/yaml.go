@@ -21,7 +21,7 @@ func ExpandConfigReader(yamlPath string) (io.Reader, error) {
 	}
 
 	var data map[string]any
-	if err := yaml.Unmarshal(raw, &data); err != nil {
+	if err = yaml.Unmarshal(raw, &data); err != nil {
 		return nil, fmt.Errorf("unmarshal yaml: %w", err)
 	}
 
@@ -38,8 +38,8 @@ func ExpandConfigReader(yamlPath string) (io.Reader, error) {
 		if key == defaultTID {
 			continue
 		}
-		tenantCfg, ok := value.(map[string]any)
-		if !ok {
+		tenantCfg, nok := value.(map[string]any)
+		if !nok {
 			return nil, fmt.Errorf("tenant %s config is not a map", key)
 		}
 		copy := deepCopy(def)
@@ -51,7 +51,7 @@ func ExpandConfigReader(yamlPath string) (io.Reader, error) {
 	buf := new(bytes.Buffer)
 	enc := yaml.NewEncoder(buf)
 	enc.SetIndent(2)
-	if err := enc.Encode(merged); err != nil {
+	if err = enc.Encode(merged); err != nil {
 		return nil, fmt.Errorf("marshal merged config: %w", err)
 	}
 	_ = enc.Close()
@@ -73,7 +73,7 @@ func deepCopy(m map[string]any) map[string]any {
 func mergeMap(dst, src map[string]any) {
 	for k, v := range src {
 		if vMap, ok := v.(map[string]any); ok {
-			if dMap, ok := dst[k].(map[string]any); ok {
+			if dMap, nok := dst[k].(map[string]any); nok {
 				mergeMap(dMap, vMap)
 			} else {
 				dst[k] = deepCopy(vMap)

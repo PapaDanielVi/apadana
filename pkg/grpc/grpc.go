@@ -65,7 +65,6 @@ func extractTenantFromMetadata(ctx context.Context) string {
 	return values[0]
 }
 
-//nolint:embeddedstructfieldcheck
 type serverStream struct {
 	grpc.ServerStream
 
