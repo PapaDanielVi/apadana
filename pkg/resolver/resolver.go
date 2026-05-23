@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"maps"
 	"net/http"
 	"strings"
 	"sync"
@@ -207,8 +208,6 @@ func (r *Registry) All() map[string]Tenant {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	out := make(map[string]Tenant, len(r.tenants))
-	for k, v := range r.tenants {
-		out[k] = v
-	}
+	maps.Copy(out, r.tenants)
 	return out
 }
