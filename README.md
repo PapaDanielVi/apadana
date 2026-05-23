@@ -1,4 +1,4 @@
-# apadana: Multi-Tenant SDK for Go
+# Apadana: Multi-Tenant SDK for Go
 
 [![Test](https://github.com/PapaDanielVi/apadana/actions/workflows/test.yml/badge.svg)](https://github.com/PapaDanielVi/apadana/actions/workflows/test.yml)
 [![Lint](https://github.com/PapaDanielVi/apadana/actions/workflows/lint.yml/badge.svg)](https://github.com/PapaDanielVi/apadana/actions/workflows/lint.yml)
@@ -79,21 +79,21 @@ See [examples/basic-http](examples/basic-http) for a complete runnable example.
 
 ## Packages
 
-| Package | Description | Key Functions / Types |
-|---------|-------------|----------------------|
-| `pkg/context` | Tenant ID in `context.Context` | `WithTenantID`, `TenantIDFromContext`, `HasTenantID` |
-| `pkg/mt` | Generic multi-tenant tools | `SetDefTenant`, `ExtractTID`, `InjectTID`, `ConfigMgr[T]`, `SDKMgr[T,C]`, `CloneCtx`, `ExpandConfigReader` |
-| `pkg/middleware` | HTTP middlewares (std, Echo) | `TenantMiddleware`, `FromHeader`, `FromQuery`, `FromSubdomain`, `TenantEchoMiddleware`, `PrometheusEchoMiddleware` |
-| `pkg/resolver` | Tenant resolver chain | `Chain`, `FromHeader`, `FromQuery`, `FromSubdomain`, `FromCookie`, `FromJWTClaim`, `Tenant`, `Registry` |
-| `pkg/grpc` | gRPC interceptors | `UnaryServerInterceptor`, `StreamServerInterceptor`, `UnaryClientInterceptor`, `StreamClientInterceptor` |
-| `pkg/timezone` | Per-tenant timezone settings | `Set`, `Now` — returns time in tenant's timezone |
-| `pkg/logger` | Logger with `tenant_id` field | `New(ctx)` — wraps `log/slog` with tenant ID |
-| `pkg/otel` | OpenTelemetry span processor | `NewTenantIDProcessor()` — adds `tenant_id` to spans |
-| `pkg/rabbitmq` | RabbitMQ with `X-Tenant-Id` header | `Publisher`, `Consumer` |
-| `pkg/kafka` | Kafka with `X-Tenant-Id` header | `Producer`, `Consumer` |
-| `pkg/nats` | NATS with `X-Tenant-Id` header | `Publisher`, `Subscriber` |
-| `pkg/httpclient` | HTTP client with tenant header injection | `Do(ctx, req)` — auto-injects `X-Tenant-Id` |
-| `pkg/burst` | Per-tenant token bucket rate limiter | `New(rate, burst)`, `Allow(ctx)` |
+| Package          | Description                              | Key Functions / Types                                                                                              |
+| ---------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `pkg/context`    | Tenant ID in `context.Context`           | `WithTenantID`, `TenantIDFromContext`, `HasTenantID`                                                               |
+| `pkg/mt`         | Generic multi-tenant tools               | `SetDefTenant`, `ExtractTID`, `InjectTID`, `ConfigMgr[T]`, `SDKMgr[T,C]`, `CloneCtx`, `ExpandConfigReader`         |
+| `pkg/middleware` | HTTP middlewares (std, Echo)             | `TenantMiddleware`, `FromHeader`, `FromQuery`, `FromSubdomain`, `TenantEchoMiddleware`, `PrometheusEchoMiddleware` |
+| `pkg/resolver`   | Tenant resolver chain                    | `Chain`, `FromHeader`, `FromQuery`, `FromSubdomain`, `FromCookie`, `FromJWTClaim`, `Tenant`, `Registry`            |
+| `pkg/grpc`       | gRPC interceptors                        | `UnaryServerInterceptor`, `StreamServerInterceptor`, `UnaryClientInterceptor`, `StreamClientInterceptor`           |
+| `pkg/timezone`   | Per-tenant timezone settings             | `Set`, `Now` — returns time in tenant's timezone                                                                   |
+| `pkg/logger`     | Logger with `tenant_id` field            | `New(ctx)` — wraps `log/slog` with tenant ID                                                                       |
+| `pkg/otel`       | OpenTelemetry span processor             | `NewTenantIDProcessor()` — adds `tenant_id` to spans                                                               |
+| `pkg/rabbitmq`   | RabbitMQ with `X-Tenant-Id` header       | `Publisher`, `Consumer`                                                                                            |
+| `pkg/kafka`      | Kafka with `X-Tenant-Id` header          | `Producer`, `Consumer`                                                                                             |
+| `pkg/nats`       | NATS with `X-Tenant-Id` header           | `Publisher`, `Subscriber`                                                                                          |
+| `pkg/httpclient` | HTTP client with tenant header injection | `Do(ctx, req)` — auto-injects `X-Tenant-Id`                                                                        |
+| `pkg/burst`      | Per-tenant token bucket rate limiter     | `New(rate, burst)`, `Allow(ctx)`                                                                                   |
 
 ## Design Decisions
 
