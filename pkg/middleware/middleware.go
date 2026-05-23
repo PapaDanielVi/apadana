@@ -48,7 +48,10 @@ func TenantMiddleware(extractor Extractor) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tenantID, err := extractor(r)
-			if err == nil && tenantID != "" {
+			if err != nil {
+				tenantID = ""
+			}
+			if tenantID != "" {
 				r = r.WithContext(tctx.WithTenantID(r.Context(), tenantID))
 			}
 			next.ServeHTTP(w, r)

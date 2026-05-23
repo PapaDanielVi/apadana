@@ -1,0 +1,59 @@
+name: Bug Report
+description: Report a bug in apadana
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of apadana are you using?
+      placeholder: v0.0.4-beta
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - pkg/context
+        - pkg/middleware
+        - pkg/mt
+        - pkg/burst
+        - pkg/kafka
+        - pkg/nats
+        - pkg/rabbitmq
+        - pkg/httpclient
+        - pkg/logger
+        - pkg/otel
+        - pkg/timezone
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: Provide a minimal code example or steps to reproduce.
+      render: go
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output.
+      render: shell

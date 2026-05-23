@@ -40,11 +40,18 @@ func NewSubscriber(nc *nats.Conn) *Subscriber {
 }
 
 // Subscribe listens on subject and calls handler with tenant-aware context.
+// It returns when the context is cancelled or a fatal error occurs.
 func (s *Subscriber) Subscribe(ctx context.Context, subject string, handler func(context.Context, *nats.Msg)) error {
-	_, err := s.nc.Subscribe(subject, func(msg *nats.Msg) {
+	sub, err := s.nc.Subscribe(subject, func(msg *nats.Msg) {
 		tenantID := msg.Header.Get("X-Tenant-Id")
-		ctx := tctx.WithTenantID(ctx, tenantID)
-		handler(ctx, msg)
+		msgCtx := tctx.WithTenantID(ctx, tenantID)
+		handler(msgCtx, msg)
 	})
-	return err
+	if err != nil {
+		return err
+	}
+
+	<-ctx.Done()
+	_ = sub.Unsubscribe()
+	return ctx.Err()
 }

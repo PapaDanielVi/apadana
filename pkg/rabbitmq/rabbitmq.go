@@ -42,17 +42,24 @@ func NewConsumer(ch *amqp091.Channel) *Consumer {
 }
 
 // Consume starts consuming and calls handler with tenant-aware context.
+// It returns when the context is cancelled or a fatal error occurs.
 func (c *Consumer) Consume(ctx context.Context, queue string, handler func(context.Context, amqp091.Delivery)) error {
 	deliveries, err := c.ch.Consume(queue, "", true, false, false, false, nil)
 	if err != nil {
 		return err
 	}
-	go func() {
-		for d := range deliveries {
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case d, ok := <-deliveries:
+			if !ok {
+				return context.Canceled
+			}
 			tenantID, _ := d.Headers["X-Tenant-Id"].(string)
-			ctx := tctx.WithTenantID(ctx, tenantID)
-			handler(ctx, d)
+			msgCtx := tctx.WithTenantID(ctx, tenantID)
+			handler(msgCtx, d)
 		}
-	}()
-	return nil
+	}
 }
