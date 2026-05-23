@@ -14,7 +14,7 @@ A Go SDK providing building blocks for multi-tenant applications. Handles tenant
 - **SaaS-Ready** — Per-tenant configuration, singletons, timezones, and rate limiting out of the box
 - **Context Propagation** — Thread-safe tenant context with `context.Context` integration
 - **Multi-Tenant Middleware** — HTTP (standard lib & Echo) middlewares for header, query, and subdomain extraction
-- **Per-Tenant Infrastructure** — Kafka/NATS/RabbitMQ header injection, database registry
+- **Per-Tenant Infrastructure** — Kafka/NATS/RabbitMQ header injection
 - **Observability** — OpenTelemetry span processor, structured logging with `log/slog`
 - **Generic SDK Managers** — Type-safe `ConfigMgr[T]` and `SDKMgr[T,C]` for any multi-tenant resource
 - **YAML Config Expansion** — Merge default and per-tenant configs with `${tenant}` placeholder replacement
@@ -63,7 +63,6 @@ func main() {
 | `pkg/timezone` | Per-tenant timezone settings | `Set`, `Now` — returns time in tenant's timezone |
 | `pkg/logger` | Logger with `tenant_id` field | `New(ctx)` — wraps `log/slog` with tenant ID |
 | `pkg/otel` | OpenTelemetry span processor | `NewTenantIDProcessor()` — adds `tenant_id` to spans |
-| `pkg/db` | Multi-tenant database support | `ColumnModel`, `DatabaseModel`, `InstanceModel` |
 | `pkg/rabbitmq` | RabbitMQ with `X-Tenant-Id` header | `Publisher`, `Consumer` |
 | `pkg/kafka` | Kafka with `X-Tenant-Id` header | `Producer`, `Consumer` |
 | `pkg/nats` | NATS with `X-Tenant-Id` header | `Publisher`, `Subscriber` |
