@@ -60,13 +60,9 @@ func main() {
 | `pkg/context` | Tenant ID in `context.Context` | `WithTenantID`, `TenantIDFromContext`, `HasTenantID` |
 | `pkg/mt` | Generic multi-tenant tools | `SetDefTenant`, `ExtractTID`, `InjectTID`, `ConfigMgr[T]`, `SDKMgr[T,C]`, `CloneCtx`, `ExpandConfigReader` |
 | `pkg/middleware` | HTTP middlewares (std, Echo) | `TenantMiddleware`, `FromHeader`, `FromQuery`, `FromSubdomain`, `TenantEchoMiddleware`, `UserAuthEchoMiddleware`, `PrometheusEchoMiddleware` |
-| `pkg/replacer` | Tenant placeholder replacement | `Replace` — replaces `{tenant_id}` in strings |
-| `pkg/config` | Per-tenant config storage | `Set`, `Get`, thread-safe key-value per tenant |
 | `pkg/timezone` | Per-tenant timezone settings | `Set`, `Now` — returns time in tenant's timezone |
-| `pkg/obj` | Lazy-init per-tenant singletons | `Register`, `Get` — centralized or per-tenant objects |
 | `pkg/logger` | Logger with `tenant_id` field | `New(ctx)` — wraps `log/slog` with tenant ID |
 | `pkg/otel` | OpenTelemetry span processor | `NewTenantIDProcessor()` — adds `tenant_id` to spans |
-| `pkg/metrics` | Prometheus metrics with `tenant_id` label | `NewCounter`, `NewHistogram` — auto-labeled |
 | `pkg/db` | Multi-tenant database support | `ColumnModel`, `DatabaseModel`, `InstanceModel` |
 | `pkg/redis` | Redis with key prefixing | `NewClient(ctx, opts)` — keys prefixed `tenant:{id}:key` |
 | `pkg/rabbitmq` | RabbitMQ with `X-Tenant-Id` header | `Publisher`, `Consumer` |
