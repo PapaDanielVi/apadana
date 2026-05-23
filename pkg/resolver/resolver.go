@@ -16,9 +16,9 @@ import (
 
 // Tenant holds metadata for a tenant.
 type Tenant struct {
-	ID       string         `json:"id" yaml:"id"`
-	Name     string         `json:"name" yaml:"name"`
-	Plan     string         `json:"plan" yaml:"plan"`
+	ID       string         `json:"id"                 yaml:"id"`
+	Name     string         `json:"name"               yaml:"name"`
+	Plan     string         `json:"plan"               yaml:"plan"`
 	Metadata map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }
 
