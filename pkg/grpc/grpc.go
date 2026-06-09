@@ -10,7 +10,7 @@ import (
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
 )
 
-const metadataTenantKey = "x-tenant-id"
+const metadataTenantKey = "X-Tenant-Id"
 
 // UnaryServerInterceptor extracts tenant ID from gRPC metadata and injects it into context.
 func UnaryServerInterceptor() grpc.UnaryServerInterceptor {

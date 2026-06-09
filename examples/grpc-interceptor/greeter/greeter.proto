@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/PapaDanielVi/apadana/examples/grpc-interceptor/greeter";
+
+package greeter;
+
+// Greeter is a simple greeting service.
+service Greeter {
+  // SayHello greets the caller with a personalized message.
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// HelloRequest is the request message for SayHello.
+message HelloRequest {
+  string name = 1;
+}
+
+// HelloReply is the response message for SayHello.
+message HelloReply {
+  string message = 1;
+}
