@@ -18,16 +18,16 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/PapaDanielVi/apadana/pkg/resolver"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/PapaDanielVi/apadana/pkg/resolver"
 )
 
 func main() {
 	// Create a tenant registry.
 	reg := resolver.NewRegistry(func(ctx context.Context) (map[string]resolver.Tenant, error) {
 		return map[string]resolver.Tenant{
-			"acme":   {ID: "acme", Name: "Acme Corp", Plan: "enterprise"},
-			"globex": {ID: "globex", Name: "Globex Inc", Plan: "pro"},
+			"acme":    {ID: "acme", Name: "Acme Corp", Plan: "enterprise"},
+			"globex":  {ID: "globex", Name: "Globex Inc", Plan: "pro"},
 			"initech": {ID: "initech", Name: "Initech", Plan: "basic"},
 		}, nil
 	})
@@ -39,10 +39,10 @@ func main() {
 
 	// Build a resolver chain with priority order.
 	chain := resolver.NewChain(
-		resolver.FromHeader("X-Tenant-Id"),      // First priority: header
-		resolver.FromQuery("tenant"),              // Second priority: query param
-		resolver.FromSubdomain(),                  // Third priority: subdomain
-		resolver.FromCookie("tenant_id"),          // Fourth priority: cookie
+		resolver.FromHeader("X-Tenant-Id"), // First priority: header
+		resolver.FromQuery("tenant"),       // Second priority: query param
+		resolver.FromSubdomain(),           // Third priority: subdomain
+		resolver.FromCookie("tenant_id"),   // Fourth priority: cookie
 	)
 
 	mux := http.NewServeMux()

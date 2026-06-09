@@ -12,8 +12,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/PapaDanielVi/apadana/pkg/httpclient"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	"github.com/PapaDanielVi/apadana/pkg/httpclient"
 )
 
 func main() {

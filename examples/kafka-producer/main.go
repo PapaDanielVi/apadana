@@ -13,8 +13,8 @@ import (
 	"log/slog"
 	"time"
 
-	kafka "github.com/PapaDanielVi/apadana/pkg/kafka"
 	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	kafka "github.com/PapaDanielVi/apadana/pkg/kafka"
 	kafkago "github.com/segmentio/kafka-go"
 )
 

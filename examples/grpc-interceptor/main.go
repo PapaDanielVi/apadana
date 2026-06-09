@@ -6,9 +6,9 @@
 //   - Integration with gRPC server and client
 //
 // This example is conceptual. In production, you would:
-//   1. Define your gRPC service implementation
-//   2. Register interceptors on both server and client
-//   3. Use the tenant ID from context in your handlers
+//  1. Define your gRPC service implementation
+//  2. Register interceptors on both server and client
+//  3. Use the tenant ID from context in your handlers
 package main
 
 import (
