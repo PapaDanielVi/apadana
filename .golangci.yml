@@ -469,3 +469,6 @@ linters:
           - noctx
           - wrapcheck
           - sloglint
+          - forbidigo
+          - govet
+          - golines
