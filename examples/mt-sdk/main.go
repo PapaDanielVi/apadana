@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/PapaDanielVi/apadana/pkg/mt"
+	"github.com/PapaDanielVi/apadana/v2/pkg/mt"
 )
 
 // SDKConfig holds configuration for a payment SDK.

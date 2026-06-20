@@ -7,8 +7,8 @@ import (
 	grpclib "google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
-	apagrpc "github.com/PapaDanielVi/apadana/pkg/grpc"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
+	apagrpc "github.com/PapaDanielVi/apadana/v2/pkg/grpc"
 )
 
 func TestUnaryServerInterceptor(t *testing.T) {

@@ -122,7 +122,7 @@ const file_greeter_proto_rawDesc = "" +
 	"HelloReply\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage2C\n" +
 	"\aGreeter\x128\n" +
-	"\bSayHello\x12\x15.greeter.HelloRequest\x1a\x13.greeter.HelloReply\"\x00BCZAgithub.com/PapaDanielVi/apadana/examples/grpc-interceptor/greeterb\x06proto3"
+	"\bSayHello\x12\x15.greeter.HelloRequest\x1a\x13.greeter.HelloReply\"\x00BCZAgithub.com/PapaDanielVi/apadana/v2/examples/grpc-interceptor/greeterb\x06proto3"
 
 var (
 	file_greeter_proto_rawDescOnce sync.Once

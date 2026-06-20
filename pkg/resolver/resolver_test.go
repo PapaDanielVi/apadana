@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 
-	"github.com/PapaDanielVi/apadana/pkg/resolver"
+	"github.com/PapaDanielVi/apadana/v2/pkg/resolver"
 )
 
 func buildJWT(claims map[string]any) string {
@@ -100,21 +103,59 @@ func TestFromCookie(t *testing.T) {
 	}
 }
 
-func TestFromJWTClaim(t *testing.T) {
+func TestFromUnsafeJWTClaim(t *testing.T) {
 	t.Parallel()
 
-	r := resolver.FromJWTClaim("tid")
+	r := resolver.FromUnsafeJWTClaim("tid")
 	token := buildJWT(map[string]any{"tid": "acme", "sub": "user1"})
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	id, err := r.Resolve(req)
 	if err != nil {
-		t.Fatalf("FromJWTClaim() error = %v", err)
+		t.Fatalf("FromUnsafeJWTClaim() error = %v", err)
 	}
 	if id != "acme" {
-		t.Errorf("FromJWTClaim() = %q, want %q", id, "acme")
+		t.Errorf("FromUnsafeJWTClaim() = %q, want %q", id, "acme")
 	}
+}
+
+func TestFromVerifiedJWT(t *testing.T) {
+	t.Parallel()
+
+	// verify accepts the token only when it equals the expected value,
+	// standing in for a real signature check.
+	const goodToken = "good-token"
+	verify := func(token string) (map[string]any, error) {
+		if token != goodToken {
+			return nil, errors.New("bad signature")
+		}
+		return map[string]any{"tid": "acme"}, nil
+	}
+
+	r := resolver.FromVerifiedJWT("tid", verify)
+
+	t.Run("valid token resolves", func(t *testing.T) {
+		t.Parallel()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Authorization", "Bearer "+goodToken)
+		id, err := r.Resolve(req)
+		if err != nil {
+			t.Fatalf("Resolve() error = %v", err)
+		}
+		if id != "acme" {
+			t.Errorf("Resolve() = %q, want %q", id, "acme")
+		}
+	})
+
+	t.Run("tampered token rejected", func(t *testing.T) {
+		t.Parallel()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Authorization", "Bearer tampered")
+		if _, err := r.Resolve(req); err == nil {
+			t.Error("Resolve() should reject a token that fails verification")
+		}
+	})
 }
 
 func TestChain(t *testing.T) {
@@ -263,6 +304,58 @@ func TestRegistry_Get_Defaults(t *testing.T) {
 	}
 }
 
+func TestRegistry_GetOrLoad(t *testing.T) {
+	t.Parallel()
+
+	var loads atomic.Int32
+	loader := func(_ context.Context) (map[string]resolver.Tenant, error) {
+		loads.Add(1)
+		return map[string]resolver.Tenant{"acme": {ID: "acme"}}, nil
+	}
+
+	reg := resolver.NewRegistry(loader)
+
+	// First call loads because the cache has never been populated.
+	tenant, ok, err := reg.GetOrLoad(context.Background(), "acme")
+	if err != nil {
+		t.Fatalf("GetOrLoad() error = %v", err)
+	}
+	if !ok || tenant.ID != "acme" {
+		t.Fatalf("GetOrLoad() = %+v, %v; want acme, true", tenant, ok)
+	}
+
+	// Without a TTL the cache never goes stale, so no second load.
+	if _, _, err = reg.GetOrLoad(context.Background(), "acme"); err != nil {
+		t.Fatalf("GetOrLoad() error = %v", err)
+	}
+	if got := loads.Load(); got != 1 {
+		t.Errorf("loader ran %d times, want 1", got)
+	}
+}
+
+func TestRegistry_GetOrLoad_TTLReload(t *testing.T) {
+	t.Parallel()
+
+	var loads atomic.Int32
+	loader := func(_ context.Context) (map[string]resolver.Tenant, error) {
+		loads.Add(1)
+		return map[string]resolver.Tenant{"acme": {ID: "acme"}}, nil
+	}
+
+	reg := resolver.NewRegistryWithTTL(loader, time.Millisecond)
+
+	if _, _, err := reg.GetOrLoad(context.Background(), "acme"); err != nil {
+		t.Fatalf("GetOrLoad() error = %v", err)
+	}
+	time.Sleep(5 * time.Millisecond)
+	if _, _, err := reg.GetOrLoad(context.Background(), "acme"); err != nil {
+		t.Fatalf("GetOrLoad() error = %v", err)
+	}
+	if got := loads.Load(); got != 2 {
+		t.Errorf("loader ran %d times after TTL expiry, want 2", got)
+	}
+}
+
 func TestFromSubdomain_IPAddress(t *testing.T) {
 	t.Parallel()
 
@@ -284,5 +377,39 @@ func TestFromSubdomain_IPAddress(t *testing.T) {
 		if tt.wantErr && err == nil {
 			t.Errorf("FromSubdomain() with host %s should return error", tt.host)
 		}
+	}
+}
+
+func TestChain_MiddlewareWithConfig_Required(t *testing.T) {
+	t.Parallel()
+
+	chain := resolver.NewChain(resolver.FromHeader("X-Tenant-Id"))
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	tests := []struct {
+		name       string
+		header     string
+		wantStatus int
+	}{
+		{"missing tenant rejected", "", http.StatusBadRequest},
+		{"present tenant passes", "acme", http.StatusOK},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			handler := chain.MiddlewareWithConfig(resolver.MiddlewareConfig{Required: true})(next)
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			if tt.header != "" {
+				req.Header.Set("X-Tenant-Id", tt.header)
+			}
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != tt.wantStatus {
+				t.Errorf("status = %d, want %d", rec.Code, tt.wantStatus)
+			}
+		})
 	}
 }

@@ -14,9 +14,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/PapaDanielVi/apadana/examples/grpc-interceptor/greeter"
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
-	apagrpc "github.com/PapaDanielVi/apadana/pkg/grpc"
+	"github.com/PapaDanielVi/apadana/v2/examples/grpc-interceptor/greeter"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
+	apagrpc "github.com/PapaDanielVi/apadana/v2/pkg/grpc"
 )
 
 // server implements the greeter.GreeterServer interface.

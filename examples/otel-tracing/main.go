@@ -12,7 +12,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/PapaDanielVi/apadana/pkg/otel"
+	"github.com/PapaDanielVi/apadana/v2/pkg/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 

@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
-const metadataTenantKey = "X-Tenant-Id"
+const metadataTenantKey = tctx.MetadataKey
 
 // UnaryServerInterceptor extracts tenant ID from gRPC metadata and injects it into context.
 func UnaryServerInterceptor() grpc.UnaryServerInterceptor {

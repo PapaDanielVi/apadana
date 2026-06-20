@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PapaDanielVi/apadana/pkg/mt"
+	"github.com/PapaDanielVi/apadana/v2/pkg/mt"
 )
 
 func TestExpandConfigReader(t *testing.T) {

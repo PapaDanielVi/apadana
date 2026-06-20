@@ -18,8 +18,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
-	"github.com/PapaDanielVi/apadana/pkg/resolver"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
+	"github.com/PapaDanielVi/apadana/v2/pkg/resolver"
 )
 
 func main() {

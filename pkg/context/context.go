@@ -6,6 +6,17 @@ import "context"
 // TenantID is a string alias for type-safe tenant identifiers.
 type TenantID string
 
+const (
+	// HeaderKey is the canonical HTTP header carrying the tenant ID.
+	// It is used for HTTP requests, message-queue headers, and the
+	// httpclient. gRPC lowercases metadata keys, so use MetadataKey there.
+	HeaderKey = "X-Tenant-Id"
+
+	// MetadataKey is the gRPC metadata key carrying the tenant ID.
+	// gRPC metadata keys are case-insensitive and stored lowercase.
+	MetadataKey = "x-tenant-id"
+)
+
 type contextKey struct{}
 
 // WithTenantID returns a copy of ctx with tenantID stored.

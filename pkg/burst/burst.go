@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 type tokenBucket struct {

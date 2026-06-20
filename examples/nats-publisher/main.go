@@ -13,8 +13,8 @@ import (
 	"log/slog"
 	"time"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
-	"github.com/PapaDanielVi/apadana/pkg/nats"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
+	"github.com/PapaDanielVi/apadana/v2/pkg/nats"
 	natsgo "github.com/nats-io/nats.go"
 )
 

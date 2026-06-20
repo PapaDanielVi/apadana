@@ -13,8 +13,8 @@ import (
 	"log/slog"
 	"time"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
-	"github.com/PapaDanielVi/apadana/pkg/rabbitmq"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
+	"github.com/PapaDanielVi/apadana/v2/pkg/rabbitmq"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

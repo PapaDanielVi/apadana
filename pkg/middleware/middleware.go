@@ -8,7 +8,7 @@ import (
 
 	"net"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 // Extractor extracts a tenant ID from an HTTP request.
@@ -62,4 +62,17 @@ func TenantMiddleware(extractor Extractor) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+// RequireTenant returns middleware that rejects requests with 400 when no
+// tenant ID is present in the context. Place it after a tenant-extracting
+// middleware to enforce that every downstream handler has a tenant.
+func RequireTenant(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !tctx.HasTenantID(r.Context()) {
+			http.Error(w, "missing tenant ID", http.StatusBadRequest)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

@@ -18,11 +18,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/PapaDanielVi/apadana/pkg/burst"
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
-	"github.com/PapaDanielVi/apadana/pkg/logger"
-	"github.com/PapaDanielVi/apadana/pkg/middleware"
-	"github.com/PapaDanielVi/apadana/pkg/mt"
+	"github.com/PapaDanielVi/apadana/v2/pkg/burst"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
+	"github.com/PapaDanielVi/apadana/v2/pkg/logger"
+	"github.com/PapaDanielVi/apadana/v2/pkg/middleware"
+	"github.com/PapaDanielVi/apadana/v2/pkg/mt"
 )
 
 type appConfig struct {

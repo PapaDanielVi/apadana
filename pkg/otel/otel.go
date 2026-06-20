@@ -7,7 +7,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 // TenantIDProcessor is a span processor that adds tenant_id to spans.

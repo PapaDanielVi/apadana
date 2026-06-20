@@ -4,7 +4,7 @@ package nats
 import (
 	"context"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 	"github.com/nats-io/nats.go"
 )
 
@@ -24,7 +24,7 @@ func (p *Publisher) Publish(ctx context.Context, subject string, data []byte) er
 	msg := &nats.Msg{
 		Subject: subject,
 		Data:    data,
-		Header:  nats.Header{"X-Tenant-Id": []string{tenantID}},
+		Header:  nats.Header{tctx.HeaderKey: []string{tenantID}},
 	}
 	return p.nc.PublishMsg(msg)
 }
@@ -43,7 +43,7 @@ func NewSubscriber(nc *nats.Conn) *Subscriber {
 // It returns when the context is cancelled or a fatal error occurs.
 func (s *Subscriber) Subscribe(ctx context.Context, subject string, handler func(context.Context, *nats.Msg)) error {
 	sub, err := s.nc.Subscribe(subject, func(msg *nats.Msg) {
-		tenantID := msg.Header.Get("X-Tenant-Id")
+		tenantID := msg.Header.Get(tctx.HeaderKey)
 		msgCtx := tctx.WithTenantID(ctx, tenantID)
 		handler(msgCtx, msg)
 	})
