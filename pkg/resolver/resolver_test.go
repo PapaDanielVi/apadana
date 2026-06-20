@@ -262,3 +262,27 @@ func TestRegistry_Get_Defaults(t *testing.T) {
 		t.Error("Get(missing) should return false for empty registry")
 	}
 }
+
+func TestFromSubdomain_IPAddress(t *testing.T) {
+    t.Parallel()
+
+    tests := []struct {
+        host    string
+        wantErr bool
+    }{
+        {"127.0.0.1", true},
+        {"192.168.1.1", true},
+        {"10.0.0.1:8080", true},
+        {"::1", true}, // IPv6
+    }
+
+    for _, tt := range tests {
+        req := httptest.NewRequest(http.MethodGet, "http://"+tt.host+"/", nil)
+        resolver := resolver.FromSubdomain()
+        _, err := resolver.Resolve(req)
+
+        if tt.wantErr && err == nil {
+            t.Errorf("FromSubdomain() with host %s should return error", tt.host)
+        }
+    }
+}
