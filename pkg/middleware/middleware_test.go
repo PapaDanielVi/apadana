@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 func TestFromHeader(t *testing.T) {
@@ -127,4 +127,33 @@ func TestFromSubdomain_IPAddress(t *testing.T) {
 			t.Errorf("FromSubdomain() with host %s returned error: %v", tt.host, err)
 		}
 	}
+}
+
+func TestRequireTenant(t *testing.T) {
+	t.Parallel()
+
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	t.Run("missing tenant rejected", func(t *testing.T) {
+		t.Parallel()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		rec := httptest.NewRecorder()
+		RequireTenant(next).ServeHTTP(rec, req)
+		if rec.Code != http.StatusBadRequest {
+			t.Errorf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+		}
+	})
+
+	t.Run("present tenant passes", func(t *testing.T) {
+		t.Parallel()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req = req.WithContext(tctx.WithTenantID(req.Context(), "acme"))
+		rec := httptest.NewRecorder()
+		RequireTenant(next).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+		}
+	})
 }

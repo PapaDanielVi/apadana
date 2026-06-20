@@ -5,7 +5,7 @@ import (
 	"context"
 	"log/slog"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 // New returns a slog.Logger that includes tenant_id from ctx if present.

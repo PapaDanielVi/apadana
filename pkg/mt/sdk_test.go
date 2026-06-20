@@ -2,10 +2,12 @@ package mt_test
 
 import (
 	"context"
+	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
-	"github.com/PapaDanielVi/apadana/pkg/mt"
+	"github.com/PapaDanielVi/apadana/v2/pkg/mt"
 )
 
 // eagerConfig implements lazyIniter returning false for eager initialization.
@@ -199,6 +201,56 @@ func TestNewSDKMgrE_Centralized(t *testing.T) {
 	}
 	if got != "central" {
 		t.Errorf("Get() = %q, want %q", got, "central")
+	}
+}
+
+func TestNewSDKMgrE_CentralizedError(t *testing.T) {
+	t.Parallel()
+
+	initFn := func(_ context.Context, _ centralizedConfig) (string, error) {
+		return "", context.DeadlineExceeded
+	}
+
+	configs := map[string]centralizedConfig{
+		"default": {centralized: true},
+	}
+
+	mgr, err := mt.NewSDKMgrE[string, centralizedConfig](configs, initFn)
+	if err == nil {
+		t.Fatal("NewSDKMgrE should return error when centralized init fails")
+	}
+	if mgr != nil {
+		t.Errorf("NewSDKMgrE should return nil manager on error, got %v", mgr)
+	}
+}
+
+func TestSDKMgr_Get_SingleFlight(t *testing.T) {
+	t.Parallel()
+
+	var initCount atomic.Int32
+	initFn := func(_ context.Context, _ string) string {
+		initCount.Add(1)
+		time.Sleep(5 * time.Millisecond)
+		return "sdk"
+	}
+
+	configs := map[string]string{"acme": "config-acme"}
+	mgr := mt.NewSDKMgr[string, string](configs, initFn)
+
+	const goroutines = 50
+	var wg sync.WaitGroup
+	wg.Add(goroutines)
+	for range goroutines {
+		go func() {
+			defer wg.Done()
+			ctx := mt.InjectTID(context.Background(), "acme")
+			_ = mgr.Get(ctx)
+		}()
+	}
+	wg.Wait()
+
+	if got := initCount.Load(); got != 1 {
+		t.Errorf("initFn ran %d times for one tenant, want exactly 1", got)
 	}
 }
 

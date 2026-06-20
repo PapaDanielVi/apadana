@@ -4,7 +4,7 @@ package rabbitmq
 import (
 	"context"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 	"github.com/rabbitmq/amqp091-go"
 )
 
@@ -21,7 +21,7 @@ func NewPublisher(ch *amqp091.Channel) *Publisher {
 // Publish sends a message with X-Tenant-Id header from ctx.
 func (p *Publisher) Publish(ctx context.Context, exchange, routingKey string, body []byte) error {
 	tenantID, _ := tctx.TenantIDFromContext(ctx)
-	headers := amqp091.Table{"X-Tenant-Id": tenantID}
+	headers := amqp091.Table{tctx.HeaderKey: tenantID}
 	return p.ch.Publish(
 		exchange, routingKey, false, false,
 		amqp091.Publishing{
@@ -57,7 +57,7 @@ func (c *Consumer) Consume(ctx context.Context, queue string, handler func(conte
 			if !ok {
 				return context.Canceled
 			}
-			tenantID, _ := d.Headers["X-Tenant-Id"].(string)
+			tenantID, _ := d.Headers[tctx.HeaderKey].(string)
 			msgCtx := tctx.WithTenantID(ctx, tenantID)
 			handler(msgCtx, d)
 		}

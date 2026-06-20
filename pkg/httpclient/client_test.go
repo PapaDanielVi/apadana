@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 func TestDo_InjectsTenantHeader(t *testing.T) {

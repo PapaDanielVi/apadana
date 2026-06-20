@@ -77,6 +77,11 @@ func (s *SDKMgr[S, C]) Get(ctx context.Context) S {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	// Re-check under the write lock so a concurrent first-call does not run
+	// initFn twice for the same tenant.
+	if sdk, exists = s.sdks[tid]; exists {
+		return sdk
+	}
 	cfg := s.configs[tid]
 	newSDK := s.initFn(ctx, cfg)
 	s.sdks[tid] = newSDK
@@ -86,6 +91,7 @@ func (s *SDKMgr[S, C]) Get(ctx context.Context) S {
 // ISDKE is the interface for SDK managers returning (T, error).
 type ISDKE[T any] interface {
 	Get(ctx context.Context) (T, error)
+	Map(func(string, T))
 	IsCentralized() bool
 }
 
@@ -121,7 +127,7 @@ func NewSDKMgrE[S any, C any](configs map[string]C, initFn InitFnE[S, C]) (ISDKE
 	if ok && isCentralized(defOpt) {
 		_, err := sm.Get(InjectTID(context.Background(), fallbackTID))
 		if err != nil {
-			return nil, nil
+			return nil, fmt.Errorf("init centralized sdk: %w", err)
 		}
 		sm.isCentralized = true
 		return sm, nil
@@ -155,6 +161,11 @@ func (s *SDKMgrE[S, C]) Get(ctx context.Context) (S, error) {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	// Re-check under the write lock so a concurrent first-call does not run
+	// initFn twice for the same tenant.
+	if sdk, exists = s.sdks[tid]; exists {
+		return sdk, nil
+	}
 	cfg := s.configs[tid]
 	newSDK, err := s.initFn(ctx, cfg)
 	if err != nil {
@@ -222,6 +233,11 @@ func (s *SDKMgrWMet[S, C, M]) Get(ctx context.Context) S {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	// Re-check under the write lock so a concurrent first-call does not run
+	// initFn twice for the same tenant.
+	if sdk, exists = s.sdks[tid]; exists {
+		return sdk
+	}
 	cfg := s.configs[tid]
 	newSDK := s.initFn(ctx, cfg, s.metrics)
 	s.sdks[tid] = newSDK

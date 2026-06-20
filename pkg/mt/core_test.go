@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/PapaDanielVi/apadana/pkg/mt"
+	"github.com/PapaDanielVi/apadana/v2/pkg/mt"
 )
 
 func TestExtractTID(t *testing.T) {

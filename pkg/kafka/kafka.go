@@ -4,7 +4,7 @@ package kafka
 import (
 	"context"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -26,7 +26,7 @@ func (p *Producer) Produce(ctx context.Context, topic string, key, value []byte)
 		Key:   key,
 		Value: value,
 		Headers: []kafka.Header{
-			{Key: "X-Tenant-Id", Value: []byte(tenantID)},
+			{Key: tctx.HeaderKey, Value: []byte(tenantID)},
 		},
 	}
 	return p.writer.WriteMessages(ctx, msg)
@@ -59,7 +59,7 @@ func (c *Consumer) Consume(ctx context.Context, handler func(context.Context, ka
 
 		var tenantID string
 		for _, h := range msg.Headers {
-			if h.Key == "X-Tenant-Id" {
+			if h.Key == tctx.HeaderKey {
 				tenantID = string(h.Value)
 				break
 			}

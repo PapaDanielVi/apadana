@@ -5,7 +5,7 @@ import (
 	"context"
 	"sync"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 var (

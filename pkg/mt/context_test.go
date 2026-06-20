@@ -3,11 +3,12 @@ package mt_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/PapaDanielVi/apadana/pkg/mt"
+	"github.com/PapaDanielVi/apadana/v2/pkg/mt"
 )
 
 func TestCloneCtx_PreservesTenantID(t *testing.T) {
@@ -90,5 +91,38 @@ func TestCloneCtx_CancellationNotInherited(t *testing.T) {
 	cloned := mt.CloneCtx(ctx)
 	if err := cloned.Err(); err != nil {
 		t.Errorf("CloneCtx() cloned context should not be cancelled, got %v", err)
+	}
+}
+
+func TestCloneCtxWithDeadline_PreservesDeadline(t *testing.T) {
+	t.Parallel()
+
+	want := time.Now().Add(time.Hour)
+	parent, cancel := context.WithDeadline(mt.InjectTID(context.Background(), "acme"), want)
+	defer cancel()
+
+	cloned, cancelClone := mt.CloneCtxWithDeadline(parent)
+	defer cancelClone()
+
+	got, ok := cloned.Deadline()
+	if !ok {
+		t.Fatal("CloneCtxWithDeadline() should carry the parent deadline")
+	}
+	if !got.Equal(want) {
+		t.Errorf("deadline = %v, want %v", got, want)
+	}
+	if tid := mt.ExtractTID(cloned); tid != "acme" {
+		t.Errorf("tenant = %q, want %q", tid, "acme")
+	}
+}
+
+func TestCloneCtxWithDeadline_NoParentDeadline(t *testing.T) {
+	t.Parallel()
+
+	cloned, cancel := mt.CloneCtxWithDeadline(mt.InjectTID(context.Background(), "acme"))
+	defer cancel()
+
+	if _, ok := cloned.Deadline(); ok {
+		t.Error("CloneCtxWithDeadline() should have no deadline when parent has none")
 	}
 }

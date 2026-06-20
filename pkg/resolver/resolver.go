@@ -6,14 +6,17 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log/slog"
 	"maps"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"net"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
+	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
 )
 
 // Tenant holds metadata for a tenant.
@@ -112,16 +115,38 @@ func FromCookie(cookieName string) Resolver {
 	})
 }
 
-// FromJWTClaim resolves tenant ID from a JWT Authorization header.
-// It extracts the claim without validating the signature — use only when
-// the token has already been validated by upstream middleware.
-func FromJWTClaim(claimName string) Resolver {
+// Verifier validates a raw JWT and returns its claims. Implement it with a
+// library such as github.com/golang-jwt/jwt or a JWKS client. Return a non-nil
+// error to reject the token.
+type Verifier func(token string) (map[string]any, error)
+
+// FromVerifiedJWT resolves a tenant ID from a JWT bearer token after verifying
+// it with verify. The token signature is checked before the claim is read, so
+// this is safe to use on untrusted requests.
+func FromVerifiedJWT(claimName string, verify Verifier) Resolver {
 	return ResolverFunc(func(r *http.Request) (string, error) {
-		auth := r.Header.Get("Authorization")
-		if !strings.HasPrefix(auth, "Bearer ") {
-			return "", errors.New("no bearer token")
+		token, err := bearerToken(r)
+		if err != nil {
+			return "", err
 		}
-		token := strings.TrimPrefix(auth, "Bearer ")
+		claims, err := verify(token)
+		if err != nil {
+			return "", fmt.Errorf("verify jwt: %w", err)
+		}
+		return claimString(claims, claimName)
+	})
+}
+
+// FromUnsafeJWTClaim resolves a tenant ID from a JWT bearer token WITHOUT
+// verifying the signature. A forged token can set any tenant ID, so use this
+// only when the token has already been validated by upstream middleware.
+// Prefer FromVerifiedJWT on untrusted requests.
+func FromUnsafeJWTClaim(claimName string) Resolver {
+	return ResolverFunc(func(r *http.Request) (string, error) {
+		token, err := bearerToken(r)
+		if err != nil {
+			return "", err
+		}
 		claim, err := extractJWTClaim(token, claimName)
 		if err != nil {
 			return "", errors.New("jwt claim " + claimName + ": " + err.Error())
@@ -130,14 +155,65 @@ func FromJWTClaim(claimName string) Resolver {
 	})
 }
 
+// bearerToken extracts the raw token from an Authorization: Bearer header.
+func bearerToken(r *http.Request) (string, error) {
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		return "", errors.New("no bearer token")
+	}
+	return strings.TrimPrefix(auth, "Bearer "), nil
+}
+
+// MiddlewareConfig configures Chain.MiddlewareWithConfig.
+type MiddlewareConfig struct {
+	// Required rejects the request with 400 when no tenant is resolved,
+	// instead of continuing without a tenant ID.
+	Required bool
+	// Logger logs resolution failures at debug level. If nil, no logging.
+	Logger *slog.Logger
+	// Validator, when set, normalizes and validates the resolved tenant ID.
+	// A failed validation is treated like a resolution failure.
+	Validator *tctx.Validator
+}
+
 // Middleware returns HTTP middleware that resolves tenant ID using the chain.
+// Resolution failures are ignored and the request continues without a tenant ID.
 func (c *Chain) Middleware() func(http.Handler) http.Handler {
+	return c.MiddlewareWithConfig(MiddlewareConfig{})
+}
+
+// ResolveValidated resolves the tenant ID from r and, when v is non-nil,
+// normalizes and validates it. It returns an empty string and an error when
+// no valid tenant is found, so framework adapters can share one code path.
+func (c *Chain) ResolveValidated(r *http.Request, v *tctx.Validator) (string, error) {
+	tenantID, err := c.Resolve(r)
+	if err != nil {
+		return "", err
+	}
+	if v != nil {
+		return v.Validate(tenantID)
+	}
+	return tenantID, nil
+}
+
+// MiddlewareWithConfig returns HTTP middleware configured by cfg.
+func (c *Chain) MiddlewareWithConfig(cfg MiddlewareConfig) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			tenantID, err := c.Resolve(r)
-			if err == nil && tenantID != "" {
-				r = r.WithContext(tctx.WithTenantID(r.Context(), tenantID))
+			tenantID, err := c.ResolveValidated(r, cfg.Validator)
+			if err != nil || tenantID == "" {
+				if cfg.Logger != nil {
+					cfg.Logger.DebugContext(r.Context(), "tenant resolution failed",
+						slog.String("path", r.URL.Path), slog.Any("error", err))
+				}
+				if cfg.Required {
+					http.Error(w, "missing tenant ID", http.StatusBadRequest)
+					return
+				}
+				next.ServeHTTP(w, r)
+				return
 			}
+			r = r.WithContext(tctx.WithTenantID(r.Context(), tenantID))
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -161,6 +237,11 @@ func extractJWTClaim(token, claimName string) (string, error) {
 		return "", err
 	}
 
+	return claimString(claims, claimName)
+}
+
+// claimString reads a string claim from a decoded JWT claim set.
+func claimString(claims map[string]any, claimName string) (string, error) {
 	v, ok := claims[claimName]
 	if !ok {
 		return "", errors.New("claim not found")
@@ -175,9 +256,11 @@ func extractJWTClaim(token, claimName string) (string, error) {
 
 // Registry loads and caches tenant metadata.
 type Registry struct {
-	mu      sync.RWMutex
-	tenants map[string]Tenant
-	loader  func(context.Context) (map[string]Tenant, error)
+	mu       sync.RWMutex
+	tenants  map[string]Tenant
+	loader   func(context.Context) (map[string]Tenant, error)
+	ttl      time.Duration
+	loadedAt time.Time
 }
 
 // NewRegistry creates a Registry that loads tenants via loader.
@@ -188,7 +271,18 @@ func NewRegistry(loader func(context.Context) (map[string]Tenant, error)) *Regis
 	}
 }
 
-// Load fetches tenants from the loader and caches them.
+// NewRegistryWithTTL creates a Registry whose cache is considered stale after
+// ttl. GetOrLoad reloads automatically once the cache is stale.
+func NewRegistryWithTTL(
+	loader func(context.Context) (map[string]Tenant, error),
+	ttl time.Duration,
+) *Registry {
+	r := NewRegistry(loader)
+	r.ttl = ttl
+	return r
+}
+
+// Load fetches tenants from the loader and atomically replaces the cache.
 func (r *Registry) Load(ctx context.Context) error {
 	tenants, err := r.loader(ctx)
 	if err != nil {
@@ -196,8 +290,31 @@ func (r *Registry) Load(ctx context.Context) error {
 	}
 	r.mu.Lock()
 	r.tenants = tenants
+	r.loadedAt = time.Now()
 	r.mu.Unlock()
 	return nil
+}
+
+// stale reports whether the cache should be reloaded.
+func (r *Registry) stale() bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if r.loadedAt.IsZero() {
+		return true
+	}
+	return r.ttl > 0 && time.Since(r.loadedAt) > r.ttl
+}
+
+// GetOrLoad returns the tenant by ID, reloading the cache first if it has
+// never been loaded or has gone stale past the TTL.
+func (r *Registry) GetOrLoad(ctx context.Context, tenantID string) (Tenant, bool, error) {
+	if r.stale() {
+		if err := r.Load(ctx); err != nil {
+			return Tenant{}, false, err
+		}
+	}
+	t, ok := r.Get(tenantID)
+	return t, ok, nil
 }
 
 // Get returns the tenant by ID.
