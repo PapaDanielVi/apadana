@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
 	"net"
+
+	tctx "github.com/PapaDanielVi/apadana/pkg/context"
 )
 
 // Extractor extracts a tenant ID from an HTTP request.
@@ -36,8 +37,8 @@ func FromSubdomain() Extractor {
 			host = host[:i]
 		}
 		if net.ParseIP(host) != nil {
-        	return "", errors.New("host is an ip address, cannot extract subdomain")
-        }
+			return "", errors.New("host is an ip address, cannot extract subdomain")
+		}
 		parts := strings.Split(host, ".")
 		if len(parts) < 2 {
 			return "", errors.New("no subdomain found")

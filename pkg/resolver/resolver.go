@@ -11,8 +11,9 @@ import (
 	"strings"
 	"sync"
 
-	tctx "github.com/PapaDanielVi/apadana/pkg/context"
 	"net"
+
+	tctx "github.com/PapaDanielVi/apadana/pkg/context"
 )
 
 // Tenant holds metadata for a tenant.
@@ -90,8 +91,8 @@ func FromSubdomain() Resolver {
 			host = host[:i]
 		}
 		if net.ParseIP(host) != nil {
-        	return "", errors.New("host is an ip address, cannot extract subdomain")
-        }
+			return "", errors.New("host is an ip address, cannot extract subdomain")
+		}
 		parts := strings.Split(host, ".")
 		if len(parts) < 2 {
 			return "", errors.New("no subdomain found")
