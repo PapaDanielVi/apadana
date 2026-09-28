@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/PapaDanielVi/apadana/examples/grpc-interceptor/greeter";
+option go_package = "github.com/PapaDanielVi/apadana/v2/examples/grpc-interceptor/greeter";
 
 package greeter;
 

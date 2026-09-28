@@ -13,6 +13,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/PapaDanielVi/apadana/v2/examples/grpc-interceptor/greeter"
 	tctx "github.com/PapaDanielVi/apadana/v2/pkg/context"
@@ -57,6 +58,7 @@ func main() {
 
 	conn, err := grpc.NewClient(
 		lis.Addr().String(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(apagrpc.UnaryClientInterceptor()),
 		grpc.WithStreamInterceptor(apagrpc.StreamClientInterceptor()),
 	)
