@@ -11,9 +11,9 @@ require (
 	github.com/prometheus/client_golang v1.24.1
 	github.com/rabbitmq/amqp091-go v1.15.0
 	github.com/segmentio/kafka-go v0.4.51
-	go.opentelemetry.io/otel v1.46.0
+	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/sdk v1.46.0
-	go.opentelemetry.io/otel/trace v1.46.0
+	go.opentelemetry.io/otel/trace v1.47.0
 	go.uber.org/mock v0.6.0
 	google.golang.org/grpc v1.85.0-dev.0.20260825072537-93e31b48545e
 	google.golang.org/protobuf v1.36.12
@@ -67,7 +67,8 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/otel/metric v1.46.0 // indirect
+	go.opentelemetry.io/otel/log v1.47.0 // indirect
+	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
